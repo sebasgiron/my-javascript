@@ -1,7 +1,10 @@
 const http = require('http'); 
 const fs = require('fs'); 
+const urlJS = require('url'); 
+
 const SRV_PUERTO = 8081; 
 const OAUTH_CALLBACK_URL = '/autorizar_evernote_callback.html'; 
+const OAUTH_END_URL = '/autorizar_evernote_fin.html'; 
 
 /* Funciones de respuesta ************************************************** */
 const dummyResponse = function(res, myMessage, statusCode = 200) {
@@ -24,19 +27,58 @@ const notFound = function(res, path)  {
 }
 
 /* Funciones de oAuth ****************************************************** */
-const prueba_evernote = require('./prueba_evernote.js'); 
+const evernoteJS = require('./evernote.js'); 
 
-var prueba_session = {
+var oAuth_session = {
 	oauthToken : undefined,
 	oauthTokenSecret : undefined, 
-	error : undefined
+	error : undefined, 
+	oauthAccessToken : undefined, 
+	oauthAccessTokenSecret : undefined, 
+	edamShard : undefined, 
+	edamUserId : undefined, 
+	edamExpires : undefined, 
+	edamNoteStoreUrl : undefined, 
+	edamWebApiUrlPrefix : undefined,
+	toHtml: function() {
+		return (
+		'<table><tr><td>Propiedad</td><td>Valor</td></tr>' + 
+		'<tr><td>oauthToken</td><td>' + this.oauthToken + '</td></tr>' +
+		'<tr><td>oauthTokenSecret</td><td>' + this.oauthTokenSecret + '</td></tr>' +
+		'<tr><td>oauthAccessToken</td><td>' + this.oauthAccessToken + '</td></tr>' +
+		'<tr><td>oauthAccessTokenSecret</td><td>' + this.oauthAccessTokenSecret + '</td></tr>' +
+		'<tr><td>edamShard</td><td>' + this.edamShard + '</td></tr>' +
+		'<tr><td>edamUserId</td><td>' + this.edamUserId + '</td></tr>' +
+		'<tr><td>edamExpires</td><td>' + this.edamExpires + '</td></tr>' +
+		'<tr><td>edamNoteStoreUrl</td><td>' + this.edamNoteStoreUrl + '</td></tr>' +
+		'<tr><td>edamWebApiUrlPrefix</td><td>' + this.edamWebApiUrlPrefix + '</td></tr>' +
+		'</table>');		
+	}
+	
 }; 
+
+function generarCallbackURL(pathname) {
+	return ('http://localhost:' + SRV_PUERTO + pathname); 
+}
+
+function oauthEnd(res) {
+	res.writeHead(200, {'Content-Type': 'text/html'}); 
+	res.end(
+	'<html>' + 
+	'<head></head>' + 
+	'<body>' + 
+	'<p>' + oAuth_session.toHtml() + '</p>' + 
+	'</body>' +
+	'</html>'); 
+}
+
 
 /* Listener **************************************************************** */
 var requestListener = function(req, res) {
+	var reqUrl = urlJS.parse(req.url); 
 	switch(req.method) {
 	case 'GET': {
-		switch(req.url) {
+		switch(reqUrl.pathname) {
 			case '/': 
 				dummyResponse(res, "Ya estás aquí; ahora, ¿qué quieres hacer?"); 
 				break; 
@@ -44,10 +86,19 @@ var requestListener = function(req, res) {
 				// getStatic(res, req.url); 			
 				// break; 
 			case '/autorizar_evernote.html':
-				prueba_evernote.oauth(req, res, OAUTH_CALLBACK_URL, prueba_session); 
+				evernoteJS.oauth(
+					req, res, generarCallbackURL(OAUTH_CALLBACK_URL), 
+					oAuth_session); 
 				break; 
 			case OAUTH_CALLBACK_URL: 
-				prueba_evernote.oauth_callback(req, res); 
+				console.log('Solicitada OAUTH_CALLBACK_URL');
+				evernoteJS.oauth_callback(
+					req, res, generarCallbackURL(OAUTH_END_URL), 
+					oAuth_session); 
+				break; 
+			case OAUTH_END_URL: 
+				console.log('Solicitada OAUTH_END_URL'); 				
+				oauthEnd(res); 
 				break; 
 			default: 
 				notFound(res, req.url); 
