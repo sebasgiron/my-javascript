@@ -1,5 +1,11 @@
 // Leer configuración
-var config = require('./config.json'); 
+const CONFIG_FILE_PATH = './config.json'; 
+
+const fs = require('fs'); 
+
+// Objeto config
+var config; 
+
 // Objeto Evernote
 var Evernote = require('evernote'); 
 
@@ -19,6 +25,31 @@ function getQueryItem(req, item) {
 	// Devolver el item solicitado
 	return searchParams.get(item); 
 }
+
+exports.saveConfig = function(path = CONFIG_FILE_PATH) {
+	rawData = JSON.stringify(config); 
+	console.log('saveConfig en ' + path); 
+	return fs.writeFileSync(path, rawData); 
+}
+
+function readConfig(path = CONFIG_FILE_PATH) {
+	rawData = fs.readFileSync(path); 
+	console.log('readConfig de ' + path); 
+	return JSON.parse(rawData); 
+}
+
+exports.getConfigHTML = function() {
+	return(
+	'<table>'+
+	'<tr><td>Propiedad</td><td>Valor</td></tr>' + 
+	'<tr><td>API_CONSUMER_KEY</td><td>' + config.API_CONSUMER_KEY + '</td></tr>' + 
+	'<tr><td>SANDBOX</td><td>' + config.SANDBOX + '</td></tr>' + 
+	'<tr><td>OAUTH_TOKEN</td><td>' + config.OAUTH_TOKEN + '</td></tr>' + 
+	'</table>'	
+	); 
+}
+
+
 
 // Página OAuth ************************************************************ */
 exports.oauth = function(req, res, oauthCallbackUrl, session) {
@@ -77,8 +108,12 @@ exports.oauth_callback = function(req, res, endUrl, session) {
 			session.edamUserId = results.edam_userId;
 			session.edamExpires = results.edam_expires;
 			session.edamNoteStoreUrl = results.edam_noteStoreUrl;
-			edamWebApiUrlPrefix = results.edam_webApiUrlPrefix;			
+			edamWebApiUrlPrefix = results.edam_webApiUrlPrefix;
+			// el access token lo guardas tb en el objeto config
+			config.OAUTH_TOKEN = oauthAccessToken; 			
 			redirect(res, endUrl);
 		  }
   });
 };
+
+config = readConfig(); 

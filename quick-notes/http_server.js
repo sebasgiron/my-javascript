@@ -5,6 +5,7 @@ const urlJS = require('url');
 const SRV_PUERTO = 8081; 
 const OAUTH_CALLBACK_URL = '/autorizar_evernote_callback.html'; 
 const OAUTH_END_URL = '/autorizar_evernote_fin.html'; 
+const OAUTH_SAVE_CONFIG_URL = '/save_oauth_config.txt';
 
 /* Funciones de respuesta ************************************************** */
 const dummyResponse = function(res, myMessage, statusCode = 200) {
@@ -66,11 +67,29 @@ function oauthEnd(res) {
 	res.end(
 	'<html>' + 
 	'<head></head>' + 
-	'<body>' + 
+	'<body>' +
+	'<p>Fin del proceso oAuth</p>' +
 	'<p>' + oAuth_session.toHtml() + '</p>' + 
+	'<form action="' + OAUTH_SAVE_CONFIG_URL + '" method="post"><button type="submit">Guardar config</button></form>' + 
 	'</body>' +
 	'</html>'); 
 }
+
+function oAuthSaveConfig(res) {
+	evernoteJS.saveConfig(); 
+	dummyResponse(res, 'Configuración Evernote guardada'); 
+}	
+
+function verConfiguracionEvernote(res) {
+	res.writeHead(200, {'Content-Type': 'text/html'}); 
+	res.end(
+	'<html>' + 
+	'<head></head>' + 
+	'<body>' +	
+	'<p>' + evernoteJS.getConfigHTML() + '</p>' + 
+	'</body>'); 
+}
+
 
 
 /* Listener **************************************************************** */
@@ -90,6 +109,9 @@ var requestListener = function(req, res) {
 					req, res, generarCallbackURL(OAUTH_CALLBACK_URL), 
 					oAuth_session); 
 				break; 
+			case '/ver_config_evernote.html': 
+				verConfiguracionEvernote(res); 
+				break; 
 			case OAUTH_CALLBACK_URL: 
 				console.log('Solicitada OAUTH_CALLBACK_URL');
 				evernoteJS.oauth_callback(
@@ -107,10 +129,10 @@ var requestListener = function(req, res) {
 		break; 
 	}
 	case 'POST': {
-		switch(req.url) {
-			// case '/begin_oauth.txt': 
-				// beginOAuth(res); 
-				// break; 
+		switch(reqUrl.pathname) {
+			case OAUTH_SAVE_CONFIG_URL: 
+				oAuthSaveConfig(res); 
+				break; 
 			default:
 				dummyResponse(res, "No sé hacer POST a la URL " + req.url); 
 				break; 		
