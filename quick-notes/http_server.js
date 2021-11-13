@@ -90,6 +90,20 @@ function verConfiguracionEvernote(res) {
 	'</body>'); 
 }
 
+/* Nueva nota ************************************************************** */
+function notaNueva(req, res) {
+	var my_data = ''; 
+	req.on('data', (chunk) => {
+			my_data = my_data + chunk; 
+			//console.log(`getUpdates data ${chunk}`); 
+		}); 
+	req.on('end', () => {
+		// Final
+		res.writeHead(200, {'Content-Type':'text/plain'}); 
+		res.end(my_data); 
+	}); 	
+}
+
 
 
 /* Listener **************************************************************** */
@@ -101,9 +115,12 @@ var requestListener = function(req, res) {
 			case '/': 
 				dummyResponse(res, "Ya estás aquí; ahora, ¿qué quieres hacer?"); 
 				break; 
-			// case '/nueva_nota.html': 
-				// getStatic(res, req.url); 			
-				// break; 
+			case '/nota_nueva.html': 
+				getStatic(res, req.url); 			
+				break; 
+			case '/estilos.css':
+				getStatic(res, req.url, 'text/css'); 
+				break; 
 			case '/autorizar_evernote.html':
 				evernoteJS.oauth(
 					req, res, generarCallbackURL(OAUTH_CALLBACK_URL), 
@@ -132,6 +149,9 @@ var requestListener = function(req, res) {
 		switch(reqUrl.pathname) {
 			case OAUTH_SAVE_CONFIG_URL: 
 				oAuthSaveConfig(res); 
+				break; 
+			case '/crear_nota.txt': 
+				notaNueva(req, res); 
 				break; 
 			default:
 				dummyResponse(res, "No sé hacer POST a la URL " + req.url); 
