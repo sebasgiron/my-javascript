@@ -1,3 +1,18 @@
+body {
+	font-family: "Segoe UI",helvetica, sans-serif;
+	font-size: 10pt
+}
+table {
+	font-size: 10pt
+}
 td {
 	vertical-align: top
+}
+input {
+	font-family: "Segoe UI",helvetica, sans-serif;
+	font-size: 10pt
+}
+.titulo {
+	font-family: "Segoe UI Semibold",helvetica, sans-serif;
+	font-size: 11pt
 }

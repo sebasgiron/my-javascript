@@ -1,6 +1,7 @@
 const http = require('http'); 
 const fs = require('fs'); 
 const urlJS = require('url'); 
+const nuevaNota = require('./nueva_nota.js'); 
 
 const SRV_PUERTO = 8081; 
 const OAUTH_CALLBACK_URL = '/autorizar_evernote_callback.html'; 
@@ -90,21 +91,6 @@ function verConfiguracionEvernote(res) {
 	'</body>'); 
 }
 
-/* Nueva nota ************************************************************** */
-function notaNueva(req, res) {
-	var my_data = ''; 
-	req.on('data', (chunk) => {
-			my_data = my_data + chunk; 
-			//console.log(`getUpdates data ${chunk}`); 
-		}); 
-	req.on('end', () => {
-		// Final
-		res.writeHead(200, {'Content-Type':'text/plain'}); 
-		res.end(my_data); 
-	}); 	
-}
-
-
 
 /* Listener **************************************************************** */
 var requestListener = function(req, res) {
@@ -151,7 +137,7 @@ var requestListener = function(req, res) {
 				oAuthSaveConfig(res); 
 				break; 
 			case '/crear_nota.txt': 
-				notaNueva(req, res); 
+				nuevaNota.postNotaNueva(req, res); 				
 				break; 
 			default:
 				dummyResponse(res, "No sé hacer POST a la URL " + req.url); 
