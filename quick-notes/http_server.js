@@ -125,6 +125,9 @@ var requestListener = function(req, res) {
 				console.log('Solicitada OAUTH_END_URL'); 				
 				oauthEnd(res); 
 				break; 
+			case '/test_list.html': 
+				evernoteJS.paginaPrueba(res); 
+				break;
 			default: 
 				notFound(res, req.url); 
 				break; 					

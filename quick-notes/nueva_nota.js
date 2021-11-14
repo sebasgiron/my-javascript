@@ -6,11 +6,14 @@
 /* POST request para procesar nueva nota *********************************** */
 exports.postNotaNueva = function(req, res) {
 	var my_data = ''; 
+	var my_input; 
 	req.on('data', (chunk) => {
 			my_data = my_data + chunk; 
 			//console.log(`getUpdates data ${chunk}`); 
 		}); 
 	req.on('end', () => {
+		my_input = procesarInput(my_data); 
+		
 		// Final
 		res.writeHead(200, {'Content-Type':'text/plain'}); 
 		res.end(procesarInput(my_data).toString()); 

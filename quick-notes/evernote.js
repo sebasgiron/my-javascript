@@ -110,10 +110,30 @@ exports.oauth_callback = function(req, res, endUrl, session) {
 			session.edamNoteStoreUrl = results.edam_noteStoreUrl;
 			edamWebApiUrlPrefix = results.edam_webApiUrlPrefix;
 			// el access token lo guardas tb en el objeto config
-			config.OAUTH_TOKEN = oauthAccessToken; 			
+			config.OAUTH_TOKEN = oauthAccessToken; 
+			config.URL_NOTE_STORE = results.edam_noteStoreUrl; 
 			redirect(res, endUrl);
 		  }
   });
 };
+
+// Página Prueba 
+exports.paginaPrueba = function(res) {
+	var client = new Evernote.Client({token: config.OAUTH_TOKEN});
+	var noteStore = client.getNoteStore();
+	noteStore.listNotebooks().then(function(notebooks) {
+	  // notebooks is the list of Notebook objects
+	  for(i=0; i<notebooks.length; i++) {
+		  nb = notebooks[i]; 
+		  console.log(nb);
+	  }
+	  
+	  res.writeHead(200, {'Content-Type' : 'text/html'});
+	  res.end(
+	  '<html><head></head>' + 
+	  '<body>' + notebooks.length + '</body>'); 
+	});	
+}
+
 
 config = readConfig(); 
