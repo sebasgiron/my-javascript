@@ -1,8 +1,25 @@
 <html>
 <head>
 <link rel="stylesheet" href="estilos.css">
+<script>
+	function get_notebook_inbox() {
+		xhttp = new XMLHttpRequest(); 
+		xhttp.open("GET", "notebook_inbox.txt", true); 
+		// Procesar respuesta en onreadystatechange
+		xhttp.onreadystatechange = function () {
+			if (this.readyState == 4 && this.status == 200) {
+				setNotebookID(this.responseText);
+			}
+		}
+		xhttp.send()		
+	}
+	function setNotebookID(notebook_id) {
+		document.getElementById('txtNotebook').value = notebook_id; 
+		document.getElementById('btnSubmit').disabled = false; 
+	}
+</script>
 </head>
-<body>
+<body onload="get_notebook_inbox()">
 <p class=titulo>
 Crear nueva nota Evernote
 </p>
@@ -17,7 +34,8 @@ Crear nueva nota Evernote
 <td><textarea id="txtCuerpo" name="txtCuerpo" cols=50 rows=10></textarea></td>
 </tr>
 </table>
-<input type="submit" value="Crear">
+<input type="hidden" id="txtNotebook" name="txtNotebook" value="">
+<input type="submit" id="btnSubmit" value="Crear" disabled=true>
 </form>
 </body>
 </html>

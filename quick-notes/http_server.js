@@ -8,6 +8,12 @@ const OAUTH_CALLBACK_URL = '/autorizar_evernote_callback.html';
 const OAUTH_END_URL = '/autorizar_evernote_fin.html'; 
 const OAUTH_SAVE_CONFIG_URL = '/save_oauth_config.txt';
 
+/* Objeto sesión para mantener el estado *********************************** */
+var evernote_session = {
+	notebook_inbox : undefined
+}; 
+
+
 /* Funciones de respuesta ************************************************** */
 const dummyResponse = function(res, myMessage, statusCode = 200) {
 	res.writeHead(statusCode, {'Content-Type': 'text/plain; charset=UTF-8'});
@@ -26,6 +32,20 @@ const notFound = function(res, path)  {
 	console.log('notFound: ' + path); 
 	res.writeHead(404, {'Content-Type' : 'text/plain'});
 	res.end('Requested path not found: ' + path); 	
+}
+
+const getNotebookInbox = function(res) {
+	if (evernote_session.notebook_inbox === undefined) {
+		// Hay que pedírselo a evernote.js
+		evernoteJS.get_notebook_inbox((nb) => {
+			evernote_session.notebook_inbox = nb.guid; 
+			res.writeHead(200, {'Content-Type': 'text/plain'}); 
+			res.end(evernote_session.notebook_inbox); 			
+		}); 
+	} else {
+		res.writeHead(200, {'Content-Type': 'text/plain'}); 
+		res.end(evernote_session.notebook_inbox); 
+	}
 }
 
 /* Funciones de oAuth ****************************************************** */
@@ -128,6 +148,9 @@ var requestListener = function(req, res) {
 			case '/test_list.html': 
 				evernoteJS.paginaPrueba(res); 
 				break;
+			case '/notebook_inbox.txt': 
+				getNotebookInbox(res); 
+				break; 
 			default: 
 				notFound(res, req.url); 
 				break; 					

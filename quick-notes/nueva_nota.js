@@ -51,7 +51,7 @@ function procesarInput(strData) {
 		} else {
 			if (i >= strData.length) {
 				// asignar 
-				elemento.valor = buffer; 
+				elemento.valor = decodeURI(buffer); 
 				result.push(elemento); 
 				elemento = null; 
 				// cambiar estado
@@ -70,7 +70,7 @@ function procesarInput(strData) {
 					}
 					case ESTADO_VALOR: {
 						if (strData.charAt(i) == "&") {
-							elemento.valor = buffer; 
+							elemento.valor = decodeURI(buffer); 
 							result.push(elemento); 
 							elemento = newElemento(); 
 							buffer = ''; 

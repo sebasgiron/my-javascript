@@ -1,6 +1,8 @@
 // Leer configuración
 const CONFIG_FILE_PATH = './config.json'; 
 
+const NOTEBOOK_INBOX_NAME = '00 Inbox'; 
+
 const fs = require('fs'); 
 
 // Objeto config
@@ -51,7 +53,7 @@ exports.getConfigHTML = function() {
 
 
 
-// Página OAuth ************************************************************ */
+/* Página OAuth ************************************************************ */
 exports.oauth = function(req, res, oauthCallbackUrl, session) {
 
   // Defines cliente evernote
@@ -80,7 +82,7 @@ exports.oauth = function(req, res, oauthCallbackUrl, session) {
   });
 };
 
-// Página OAuth Callback *************************************************** */
+/* Página OAuth Callback *************************************************** */
 exports.oauth_callback = function(req, res, endUrl, session) {
 	  // Defines cliente evernote
 	  var client = new Evernote.Client({
@@ -116,6 +118,26 @@ exports.oauth_callback = function(req, res, endUrl, session) {
 		  }
   });
 };
+
+/* Función para obtener el valor del Notebook de Inbox ******************* */
+exports.get_notebook_inbox = function(f_callback) {
+	var client = new Evernote.Client({token: config.OAUTH_TOKEN});
+	var noteStore = client.getNoteStore();
+	noteStore.listNotebooks().then(function(notebooks) {
+		var nb_found; 
+		// Buscamos el notebook con el nombre apropiado
+		for(i=0; i<notebooks.length && nb_found === undefined; i++) {
+		  if (notebooks[i].name == NOTEBOOK_INBOX_NAME) {
+			  nb_found = notebooks[i]
+		  }
+		}
+		// Llamar a función callback
+		f_callback(nb_found); 
+	});		
+	
+}
+	
+
 
 // Página Prueba 
 exports.paginaPrueba = function(res) {
